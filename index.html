@@ -157,8 +157,8 @@
                     }
                     filename += ".dxf";
 
-                    var fileUrl = 'https://raw.githubusercontent.com/Cipulot/ec_tkl_x-plate-maker/contents/Plate_Indexed_Name/' + boardValue + '_Plate_Indexed_Name/' + filename;
-                    var licenseUrl = 'https://raw.githubusercontent.com/Cipulot/ec_tkl_x-plate-maker/contents/LICENSE';
+                    var fileUrl = 'https://raw.githubusercontent.com/Cipulot/ec_tkl_x-plate-maker/refs/heads/main/Plate_Indexed_Name/' + boardValue + '_Plate_Indexed_Name/' + filename;
+                    var licenseUrl = 'https://raw.githubusercontent.com/Cipulot/ec_tkl_x-plate-maker/refs/heads/main/LICENSE';
 
                     fetch(fileUrl)
                         .then(response => response.json())
@@ -190,10 +190,10 @@
 
                                             // Add appropriate guide files based on hole type
                                             if (holeType === "Densus_Inserts") {
-                                                additionalFiles.push('https://github.com/Cipulot/ec_tkl_x-plate-maker/contents/densus_ec_insert_design_guide.png?raw=true',
-                                                    'https://github.com/Cipulot/ec_tkl_x-plate-maker/contents/simple_counterbore.png?raw=true');
+                                                additionalFiles.push('https://github.com/Cipulot/ec_tkl_x-plate-maker/refs/heads/main/densus_ec_insert_design_guide.png?raw=true',
+                                                    'https://github.com/Cipulot/ec_tkl_x-plate-maker/refs/heads/main/simple_counterbore.png?raw=true');
                                             } else if (holeType === "Tapped_Holes") {
-                                                additionalFiles.push('https://github.com/Cipulot/ec_tkl_x-plate-maker/contents/simple_tapped.png?raw=true');
+                                                additionalFiles.push('https://github.com/Cipulot/ec_tkl_x-plate-maker/refs/heads/main/simple_tapped.png?raw=true');
                                             }
 
                                             // Fetch and add all additional files to the zip
