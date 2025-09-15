@@ -5,48 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EC TKL X & EC TKL X SE Plate Maker</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <style>
-        form label,
-        form select,
-        form button {
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        select,
-        button {
-            min-width: 100%;
-            height: 40px;
-        }
-
-        @media (max-width: 600px) {
-            body {
-                font-size: 18px;
-            }
-
-            button {
-                padding: 15px 30px;
-                margin-top: 25px;
-            }
-        }
-
-        button {
-            margin-top: 25px;
-        }
-
-        footer {
-            margin-top: 50px;
-        }
-    </style>
 </head>
 
 <body>
     <h1>EC TKL X & EC TKL X SE Plate Maker</h1>
-    <p>This plate maker is specifically for the EC TKL X PCB (Rev 1.0 and later) and the EC TKL X SE PCB (Rev 1.0 and later) and their own screw hole placement.</p>
+    <p>This plate maker is specifically for the EC TKL X PCB (Rev 1.0 and later) and the EC TKL X SE PCB (Rev 1.0 and
+        later) and their own screw hole placement.</p>
     <form id="configForm">
         <label for="board">Base Board:</label>
         <select id="board">
@@ -162,35 +130,57 @@
                     var licenseUrl = 'https://raw.githubusercontent.com/Cipulot/ec_tkl_x-plate-maker/refs/heads/main/LICENSE';
 
                     fetch(fileUrl)
-                        .then(response => response.arrayBuffer())
-                        .then(arrayBuffer => {
-                            var byteArray = new Uint8Array(arrayBuffer);
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.encoding === 'base64') {
+                                var base64String = data.content.replace(/\n/g, '');
+                                var binaryString = atob(base64String);
+                                var byteArray = new Uint8Array(binaryString.length);
+                                for (var i = 0; i < binaryString.length; i++) {
+                                    byteArray[i] = binaryString.charCodeAt(i);
+                                }
 
-                            var zip = new JSZip();
-                            zip.file(filename, byteArray);
+                                var zip = new JSZip();
+                                zip.file(filename, byteArray);
 
                                 fetch(licenseUrl)
-                                    .then(response => response.text())
-                                    .then(licenseText => {
-                                        zip.file("LICENSE", licenseText);
+                                    .then(response => response.json())
+                                    .then(licenseData => {
+                                        if (licenseData.encoding === 'base64') {
+                                            var licenseBase64 = licenseData.content.replace(/\n/g, '');
+                                            var licenseBinary = atob(licenseBase64);
+                                            var licenseByteArray = new Uint8Array(licenseBinary.length);
+                                            for (var i = 0; i < licenseBinary.length; i++) {
+                                                licenseByteArray[i] = licenseBinary.charCodeAt(i);
+                                            }
+                                            zip.file("LICENSE", licenseByteArray);
 
                                             var additionalFiles = [];
 
                                             // Add appropriate guide files based on hole type
                                             if (holeType === "Densus_Inserts") {
-                                                additionalFiles.push('https://raw.githubusercontent.com/Cipulot/ec_tkl_x-plate-maker/refs/heads/main/densus_ec_insert_design_guide.png?raw=true',
-                                                    'https://raw.githubusercontent.com/Cipulot/ec_tkl_x-plate-maker/refs/heads/main/simple_counterbore.png?raw=true');
+                                                additionalFiles.push('https://github.com/Cipulot/ec_tkl_x-plate-maker/refs/heads/main/densus_ec_insert_design_guide.png?raw=true',
+                                                    'https://github.com/Cipulot/ec_tkl_x-plate-maker/refs/heads/main/simple_counterbore.png?raw=true');
                                             } else if (holeType === "Tapped_Holes") {
-                                                additionalFiles.push('https://raw.githubusercontent.com/Cipulot/ec_tkl_x-plate-maker/refs/heads/main/simple_tapped.png?raw=true');
+                                                additionalFiles.push('https://github.com/Cipulot/ec_tkl_x-plate-maker/refs/heads/main/simple_tapped.png?raw=true');
                                             }
 
                                             // Fetch and add all additional files to the zip
-                                            Promise.all(additionalFiles.map(fileUrl => fetch(fileUrl).then(response => response.arrayBuffer())))
-                                                .then(fileBufferArray => {
-                                                    additionalFiles.forEach((fileUrl, index) => {
-                                                        var fileName = fileUrl.split('/').pop().split('?')[0]; // Extract filename from URL
-                                                        var byteArray = new Uint8Array(fileBufferArray[index]);
-                                                        zip.file(fileName, byteArray);
+                                            Promise.all(additionalFiles.map(fileUrl => fetch(fileUrl).then(response => response.json())))
+                                                .then(fileDataArray => {
+                                                    fileDataArray.forEach(fileData => {
+                                                        if (fileData.encoding === 'base64') {
+                                                            var base64 = fileData.content.replace(/\n/g, '');
+                                                            var binary = atob(base64);
+                                                            var byteArray = new Uint8Array(binary.length);
+                                                            for (var i = 0; i < binary.length; i++) {
+                                                                byteArray[i] = binary.charCodeAt(i);
+                                                            }
+                                                            var fileName = fileData.name;
+                                                            zip.file(fileName, byteArray);
+                                                        } else {
+                                                            throw new Error('File content is not base64 encoded: ' + fileData.name);
+                                                        }
                                                     });
 
                                                     // Generate and save the zip file
@@ -211,10 +201,16 @@
                                                 .catch(error => {
                                                     console.error('Error fetching additional files:', error);
                                                 });
+                                        } else {
+                                            throw new Error('License content is not base64 encoded');
+                                        }
                                     })
                                     .catch(error => {
                                         console.error('Error fetching license:', error);
                                     });
+                            } else {
+                                throw new Error('DXF file content is not base64 encoded');
+                            }
                         })
                         .catch(error => {
                             console.error('Error fetching DXF file:', error);
