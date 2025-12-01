@@ -25,6 +25,12 @@
             <option value="Bias_R2">Bias R2</option>
             <option value="Transition">Transition</option>
         </select>
+        <label for="caps_lock">Caps Lock:</label>
+        <select id="caps_lock">
+            <option value="" selected disabled hidden>Choose here</option>
+            <option value="0">Normal Caps Lock</option>
+            <option value="1">Stepped Caps Lock</option>
+        </select>
         <label for="f_row">F-Row:</label>
         <select id="f_row">
             <option value="" selected disabled hidden>Choose here</option>
@@ -81,12 +87,6 @@
             <option value="General_OEM_Style">General OEM-Style</option>
             <option value="Dynacap_Style">Dynacap Style</option>
         </select>
-        <label for="hole_type">Hole Type:</label>
-        <select id="hole_type">
-            <option value="" selected disabled hidden>Choose here</option>
-            <option value="Tapped_Holes">Tapped Holes</option>
-            <option value="Densus_Inserts">Densus Inserts</option>
-        </select>
         <button type="submit">Download</button>
     </form>
 
@@ -114,15 +114,11 @@
                     alert("Please select all configurations.");
                 } else {
                     var boardValue = $("#board").val();
-                    var configIndices = $('select').not('#board, #switch_type, #hole_type').map(function () { return $(this).val(); }).get();
+                    var configIndices = $('select').not('#board, #switch_type').map(function () { return $(this).val(); }).get();
                     var switchType = $("#switch_type").val();
-                    var holeType = $("#hole_type").val();
                     var filename = boardValue + "_" + configIndices.join('_');
                     if (switchType === "Dynacap_Style") {
                         filename += "_Dynacap";
-                    }
-                    if (holeType === "Densus_Inserts") {
-                        filename += "_Densus_Inserts";
                     }
                     filename += ".dxf";
 
@@ -144,13 +140,7 @@
 
                                     var additionalFiles = [];
 
-                                    // Add appropriate guide files based on hole type
-                                    if (holeType === "Densus_Inserts") {
-                                        additionalFiles.push('https://raw.githubusercontent.com/Cipulot/ec_tkl_x-plate-maker/refs/heads/main/densus_ec_insert_design_guide.png?raw=true',
-                                            'https://raw.githubusercontent.com/Cipulot/ec_tkl_x-plate-maker/refs/heads/main/simple_counterbore.png?raw=true');
-                                    } else if (holeType === "Tapped_Holes") {
-                                        additionalFiles.push('https://raw.githubusercontent.com/Cipulot/ec_tkl_x-plate-maker/refs/heads/main/simple_tapped.png?raw=true');
-                                    }
+                                    additionalFiles.push('https://raw.githubusercontent.com/Cipulot/ec_tkl_x-plate-maker/refs/heads/main/simple_tapped.png?raw=true');
 
                                     // Fetch and add all additional files to the zip
                                     Promise.all(additionalFiles.map(fileUrl => fetch(fileUrl).then(response => response.arrayBuffer())))
@@ -166,11 +156,6 @@
                                                 var zipFilename = boardValue + "_" + configIndices.join('_');
                                                 if (switchType === "Dynacap_Style") {
                                                     zipFilename += "_Dynacap";
-                                                }
-                                                if (holeType === "Densus_Inserts") {
-                                                    zipFilename += "_Densus_Inserts";
-                                                } else if (holeType === "Tapped_Holes") {
-                                                    zipFilename += "_Tapped_Holes";
                                                 }
                                                 zipFilename += ".zip";
                                                 saveAs(content, zipFilename);
